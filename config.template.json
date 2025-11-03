@@ -1,0 +1,35 @@
+{
+  "aws": {
+    "region": "us-east-1",
+    "accountId": "YOUR_ACCOUNT_ID"
+  },
+  "s3": {
+    "uploadsBucket": "photogallery-uploads-YOUR-ID",
+    "processedBucket": "photogallery-processed-YOUR-ID",
+    "websiteBucket": "photogallery-website-YOUR-ID"
+  },
+  "cognito": {
+    "userPoolId": "us-east-1_xxxxxxxxx",
+    "clientId": "xxxxxxxxxxxxxxxxxxxx",
+    "region": "us-east-1"
+  },
+  "dynamodb": {
+    "tableName": "PhotoGallery-Images",
+    "region": "us-east-1"
+  },
+  "apiGateway": {
+    "apiId": "xxxxxxxxxx",
+    "region": "us-east-1",
+    "stage": "prod",
+    "url": "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod"
+  },
+  "cloudfront": {
+    "websiteDistributionId": "XXXXXXXXXXX",
+    "websiteUrl": "https://xxxxxxxxxxxxx.cloudfront.net",
+    "imagesDistributionId": "XXXXXXXXXXX",
+    "imagesUrl": "https://xxxxxxxxxxxxx.cloudfront.net"
+  },
+  "lambda": {
+    "roleArn": "arn:aws:iam::ACCOUNT_ID:role/PhotoGalleryLambdaRole"
+  }
+}
