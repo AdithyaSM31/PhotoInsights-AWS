@@ -1,12 +1,12 @@
 {
   "aws": {
     "region": "us-east-1",
-    "accountId": "YOUR_ACCOUNT_ID"
+    "accountId": "799016889364"
   },
   "s3": {
-    "uploadsBucket": "photogallery-uploads-YOUR-ID",
-    "processedBucket": "photogallery-processed-YOUR-ID",
-    "websiteBucket": "photogallery-website-YOUR-ID"
+    "uploadsBucket": "photogallery-uploads-23brs1079",
+    "processedBucket": "photogallery-processed-23brs1079",
+    "websiteBucket": "photogallery-website-23brs1079"
   },
   "cognito": {
     "userPoolId": "us-east-1_xxxxxxxxx",
