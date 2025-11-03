@@ -1,0 +1,10 @@
+﻿{
+  "body": "{\"filename\":\"test-image.jpg\",\"contentType\":\"image/jpeg\",\"fileSize\":2048576}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-12345"
+      }
+    }
+  }
+}
