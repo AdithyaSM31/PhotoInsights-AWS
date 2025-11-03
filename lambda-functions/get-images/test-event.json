@@ -1,0 +1,1 @@
+{"requestContext":{"authorizer":{"claims":{"sub":"test-user-123"}}},"queryStringParameters":{"limit":"10","sortOrder":"desc"}}
