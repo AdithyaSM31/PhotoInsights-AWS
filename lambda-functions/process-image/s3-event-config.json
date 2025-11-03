@@ -1,0 +1,19 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "ProcessImageTrigger",
+      "LambdaFunctionArn": "arn:aws:lambda:us-east-1:799016889364:function:PhotoGallery-ProcessImage",
+      "Events": ["s3:ObjectCreated:Put", "s3:ObjectCreated:Post"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
