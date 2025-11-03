@@ -1,0 +1,1 @@
+{"statusCode": 404, "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Allow-Methods": "DELETE,OPTIONS"}, "body": "{\"error\": \"Image not found\", \"message\": \"Image test-image-123 does not exist or does not belong to user\"}"}
