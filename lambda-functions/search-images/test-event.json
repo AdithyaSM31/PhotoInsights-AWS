@@ -1,0 +1,1 @@
+{"requestContext":{"authorizer":{"claims":{"sub":"test-user-123"}}},"queryStringParameters":{"tags":"sunset,beach","limit":"10","sortOrder":"desc"}}
