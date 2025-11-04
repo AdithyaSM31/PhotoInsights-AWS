@@ -1,0 +1,14 @@
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "photogallery-uploads-23brs1079"
+        },
+        "object": {
+          "key": "uploads/5478e408-e0d1-705b-af48-73ffd82b1bde/7489e8ae-2547-4e50-9f36-16516a9effeb-20251104044618-sean-oulashin-KMn4VEeEPR8-unsplash.jpg"
+        }
+      }
+    }
+  ]
+}

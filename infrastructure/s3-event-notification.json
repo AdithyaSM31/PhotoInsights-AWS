@@ -1,0 +1,19 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "ProcessImageOnUpload",
+      "LambdaFunctionArn": "arn:aws:lambda:us-east-1:799016889364:function:ProcessImage",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

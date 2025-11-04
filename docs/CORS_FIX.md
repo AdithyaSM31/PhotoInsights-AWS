@@ -106,5 +106,7 @@ Invoke-WebRequest -Uri "https://fjr24hbqvb.execute-api.us-east-1.amazonaws.com/p
 ## Status
 - ✅ Lambda functions return CORS headers
 - ✅ S3 bucket is publicly accessible
-- ⚠️ API Gateway OPTIONS methods need manual configuration
-- ⬜ After fix, test end-to-end upload/view workflow
+- ✅ API Gateway OPTIONS methods configured with MOCK integration
+- ✅ CORS headers verified (200 OK with proper headers)
+- ✅ API deployed (deployment: sjzg9j)
+- ✅ Ready for end-to-end testing!
