@@ -137,7 +137,7 @@ def build_image_response(item, user_id):
         'urls': {
             'thumbnail': f"{base_url}/processed/{user_id}/thumb-{image_id}.jpg",
             'medium': f"{base_url}/processed/{user_id}/med-{image_id}.jpg",
-            'large': f"{base_url}/processed/{user_id}/{image_id}.webp",
+            'large': f"{base_url}/processed/{user_id}/{image_id}.jpg",
             'original': f"{base_url}/uploads/{user_id}/{image_id}-{item.get('imageName', 'image.jpg')}"
         }
     }
@@ -150,8 +150,9 @@ def build_image_response(item, user_id):
         ai_analysis = item['aiAnalysis']
         image_data['aiAnalysis'] = {
             'faceCount': int(ai_analysis.get('faceCount', 0)),
-            'hasText': bool(ai_analysis.get('detectedText', [])),
-            'moderationFlags': ai_analysis.get('moderationFlags', [])
+            'hasText': bool(ai_analysis.get('hasText', False)),
+            'isSafe': bool(ai_analysis.get('isSafe', True)),
+            'topLabels': [label.get('name', '') for label in (ai_analysis.get('labels', [])[:5] if isinstance(ai_analysis.get('labels'), list) else [])]
         }
     
     if 'processingStatus' in item:

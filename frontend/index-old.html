@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery - Serverless Cloud Application</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1544.0.min.js"></script>
+    <script src="https://unpkg.com/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Authentication Screen -->
+    <div id="auth-container" class="container auth-container">
+        <div class="auth-box">
+            <h1>📸 Photo Gallery</h1>
+            <p class="subtitle">Serverless Cloud Application</p>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <h2>Sign In</h2>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button onclick="login()" class="btn btn-primary">Sign In</button>
+                <p class="auth-link">Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-form" style="display:none;">
+                <h2>Sign Up</h2>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password (min 8 chars)" required>
+                <input type="password" id="signup-confirm" placeholder="Confirm Password" required>
+                <button onclick="signup()" class="btn btn-primary">Sign Up</button>
+                <p class="auth-link">Already have an account? <a href="#" onclick="showLogin()">Sign In</a></p>
+            </div>
+
+            <!-- Verification Form -->
+            <div id="verify-form" class="auth-form" style="display:none;">
+                <h2>Verify Email</h2>
+                <p>Please enter the verification code sent to your email</p>
+                <input type="text" id="verify-code" placeholder="Verification Code" required>
+                <button onclick="verifyEmail()" class="btn btn-primary">Verify</button>
+            </div>
+
+            <div id="auth-error" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-container" class="container" style="display:none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📸 My Photo Gallery</h1>
+                <div class="user-info">
+                    <span id="user-email"></span>
+                    <button onclick="logout()" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="upload-box" id="upload-box">
+                <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFileSelect(event)">
+                <div class="upload-content" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-icon">📁</div>
+                    <h3>Upload Photos</h3>
+                    <p>Click to browse or drag and drop images here</p>
+                    <p class="upload-hint">Supports: JPG, PNG, GIF, WebP (max 10MB)</p>
+                </div>
+            </div>
+            <div id="upload-progress" class="upload-progress" style="display:none;"></div>
+        </section>
+
+        <!-- Search Bar -->
+        <section class="search-section">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by tags (e.g., sunset, beach, nature)...">
+                <button onclick="searchImages()" class="btn btn-primary">🔍 Search</button>
+                <button onclick="clearSearch()" class="btn btn-secondary">Clear</button>
+            </div>
+            <div class="search-filters">
+                <label>
+                    <input type="checkbox" id="filter-faces"> Photos with faces
+                </label>
+                <label>
+                    <input type="checkbox" id="filter-text"> Photos with text
+                </label>
+                <input type="date" id="filter-date-from" placeholder="From date">
+                <input type="date" id="filter-date-to" placeholder="To date">
+            </div>
+        </section>
+
+        <!-- Gallery -->
+        <section class="gallery-section">
+            <div class="gallery-header">
+                <h2>Your Photos <span id="photo-count">(0)</span></h2>
+                <button onclick="loadGallery()" class="btn btn-secondary">↻ Refresh</button>
+            </div>
+            <div id="gallery" class="gallery"></div>
+            <div id="gallery-loading" class="loading" style="display:none;">
+                <div class="spinner"></div>
+            </div>
+            <div id="no-photos" class="no-photos" style="display:none;">
+                <p>📷 No photos yet. Upload your first image!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="modal" style="display:none;" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="modal-image" src="" alt="">
+            <div class="modal-info">
+                <h3 id="modal-title"></h3>
+                <div id="modal-tags" class="tags"></div>
+                <div id="modal-ai-info" class="ai-info"></div>
+                <div class="modal-actions">
+                    <button onclick="downloadImage()" class="btn btn-secondary">⬇️ Download</button>
+                    <button onclick="deleteCurrentImage()" class="btn btn-danger">🗑️ Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config & Scripts -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

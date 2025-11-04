@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Gallery - Serverless Cloud Application</title>
+    <title>PhotoInsights - AI-Powered Photo Gallery</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- AWS SDK -->
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1544.0.min.js"></script>
     <script src="https://unpkg.com/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
 </head>
-<body>
+<body class="light-mode">
     <!-- Loading Screen -->
     <div id="loading" class="loading">
         <div class="spinner"></div>
@@ -18,121 +25,284 @@
     <!-- Authentication Screen -->
     <div id="auth-container" class="container auth-container">
         <div class="auth-box">
-            <h1>📸 Photo Gallery</h1>
-            <p class="subtitle">Serverless Cloud Application</p>
+            <div class="auth-logo">
+                <img src="logo.png" alt="PhotoInsights" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <h1>PhotoInsights</h1>
+            <p class="subtitle">Sign in to continue</p>
             
             <!-- Login Form -->
             <div id="login-form" class="auth-form">
-                <h2>Sign In</h2>
                 <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button onclick="login()" class="btn btn-primary">Sign In</button>
-                <p class="auth-link">Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+                <p class="auth-link">Don't have an account? <a href="#" onclick="showSignup()">Create account</a></p>
             </div>
-
+            
             <!-- Signup Form -->
             <div id="signup-form" class="auth-form" style="display:none;">
-                <h2>Sign Up</h2>
                 <input type="email" id="signup-email" placeholder="Email" required>
-                <input type="password" id="signup-password" placeholder="Password (min 8 chars)" required>
-                <input type="password" id="signup-confirm" placeholder="Confirm Password" required>
-                <button onclick="signup()" class="btn btn-primary">Sign Up</button>
-                <p class="auth-link">Already have an account? <a href="#" onclick="showLogin()">Sign In</a></p>
+                <input type="password" id="signup-password" placeholder="Password (min 8 characters)" required>
+                <input type="password" id="signup-confirm" placeholder="Confirm password" required>
+                <button onclick="signup()" class="btn btn-primary">Create Account</button>
+                <p class="auth-link">Already have an account? <a href="#" onclick="showLogin()">Sign in</a></p>
             </div>
-
+            
             <!-- Verification Form -->
             <div id="verify-form" class="auth-form" style="display:none;">
-                <h2>Verify Email</h2>
-                <p>Please enter the verification code sent to your email</p>
-                <input type="text" id="verify-code" placeholder="Verification Code" required>
+                <p class="verify-message">We've sent a verification code to <strong id="verify-email"></strong></p>
+                <input type="text" id="verify-code" placeholder="Enter verification code" required>
                 <button onclick="verifyEmail()" class="btn btn-primary">Verify</button>
+                <p class="auth-link"><a href="#" onclick="showLogin()">Back to sign in</a></p>
             </div>
-
-            <div id="auth-error" class="error"></div>
         </div>
     </div>
 
-    <!-- Main Application -->
-    <div id="app-container" class="container" style="display:none;">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1>📸 My Photo Gallery</h1>
-                <div class="user-info">
-                    <span id="user-email"></span>
-                    <button onclick="logout()" class="btn btn-secondary">Logout</button>
+    <!-- Main App -->
+    <div id="app-container" class="app-container" style="display: none;">
+        <!-- Top App Bar -->
+        <header class="app-bar">
+            <div class="app-bar-left">
+                <button class="icon-btn menu-btn" onclick="toggleSidebar()">
+                    <span class="material-icons">menu</span>
+                </button>
+                <div class="app-logo">
+                    <img src="logo.png" alt="PhotoInsights" style="width: 40px; height: 40px; object-fit: contain;">
+                    <span>PhotoInsights</span>
                 </div>
+                <div class="search-bar">
+                    <span class="material-icons">search</span>
+                    <input type="text" id="search-input" placeholder="Search your photos" onkeypress="if(event.key==='Enter')searchImages()">
+                </div>
+            </div>
+            <div class="app-bar-right">
+                <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme">
+                    <span class="material-icons theme-icon">dark_mode</span>
+                </button>
+                <button class="icon-btn" onclick="showUploadDialog()" title="Upload photos">
+                    <span class="material-icons">cloud_upload</span>
+                </button>
+                <button class="icon-btn" onclick="loadGallery()" title="Refresh">
+                    <span class="material-icons">refresh</span>
+                </button>
+                <button class="user-avatar" onclick="toggleUserMenu()">
+                    <span id="user-initial"></span>
+                </button>
             </div>
         </header>
 
-        <!-- Upload Section -->
-        <section class="upload-section">
-            <div class="upload-box" id="upload-box">
-                <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFileSelect(event)">
-                <div class="upload-content" onclick="document.getElementById('file-input').click()">
-                    <div class="upload-icon">📁</div>
-                    <h3>Upload Photos</h3>
-                    <p>Click to browse or drag and drop images here</p>
-                    <p class="upload-hint">Supports: JPG, PNG, GIF, WebP (max 10MB)</p>
+        <!-- User Dropdown -->
+        <div class="user-menu" id="user-menu">
+            <div class="user-menu-header">
+                <div class="user-avatar-large">
+                    <span id="user-initial-large"></span>
+                </div>
+                <div class="user-info">
+                    <div id="user-email" class="user-email"></div>
                 </div>
             </div>
-            <div id="upload-progress" class="upload-progress" style="display:none;"></div>
-        </section>
+            <button onclick="logout()" class="user-menu-item">
+                <span class="material-icons">logout</span>
+                Sign out
+            </button>
+        </div>
 
-        <!-- Search Bar -->
-        <section class="search-section">
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Search by tags (e.g., sunset, beach, nature)...">
-                <button onclick="searchImages()" class="btn btn-primary">🔍 Search</button>
-                <button onclick="clearSearch()" class="btn btn-secondary">Clear</button>
-            </div>
-            <div class="search-filters">
-                <label>
-                    <input type="checkbox" id="filter-faces"> Photos with faces
-                </label>
-                <label>
-                    <input type="checkbox" id="filter-text"> Photos with text
-                </label>
-                <input type="date" id="filter-date-from" placeholder="From date">
-                <input type="date" id="filter-date-to" placeholder="To date">
-            </div>
-        </section>
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showPhotos(event)">
+                    <span class="material-icons">photo_library</span>
+                    <span>Photos</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSearch(event)">
+                    <span class="material-icons">search</span>
+                    <span>Search</span>
+                </a>
+                <div class="nav-divider"></div>
+                <div class="storage-widget">
+                    <span class="material-icons">cloud_queue</span>
+                    <div class="storage-info">
+                        <div class="storage-label">Storage</div>
+                        <div id="photo-count" class="storage-value">0 photos</div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
 
-        <!-- Gallery -->
-        <section class="gallery-section">
-            <div class="gallery-header">
-                <h2>Your Photos <span id="photo-count">(0)</span></h2>
-                <button onclick="loadGallery()" class="btn btn-secondary">↻ Refresh</button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Dialog -->
+            <div class="dialog" id="upload-dialog">
+                <div class="dialog-overlay" onclick="closeUploadDialog()"></div>
+                <div class="dialog-card">
+                    <div class="dialog-header">
+                        <h2>Upload photos</h2>
+                        <button class="icon-btn" onclick="closeUploadDialog()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="dialog-body">
+                        <div class="upload-zone" id="upload-zone">
+                            <span class="material-icons">cloud_upload</span>
+                            <h3>Drag photos here</h3>
+                            <p>or</p>
+                            <button class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('file-input').click();">
+                                Select from computer
+                            </button>
+                            <p class="upload-info">JPG, PNG, GIF, WebP • Max 10MB per file</p>
+                            <input type="file" id="file-input" accept="image/*" multiple hidden>
+                        </div>
+                        <div id="upload-progress" class="upload-progress"></div>
+                    </div>
+                </div>
             </div>
-            <div id="gallery" class="gallery"></div>
-            <div id="gallery-loading" class="loading" style="display:none;">
-                <div class="spinner"></div>
+
+            <!-- Search Panel -->
+            <div class="search-panel" id="search-panel">
+                <div class="panel-header">
+                    <h2>Search your photos</h2>
+                    <button class="icon-btn" onclick="closeSearch()">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="search-field">
+                        <span class="material-icons">search</span>
+                        <input type="text" id="search-tags" placeholder="beach, sunset, person...">
+                    </div>
+                    <div class="filters-section">
+                        <h3>Filters</h3>
+                        <label class="switch-label">
+                            <input type="checkbox" id="filter-faces">
+                            <span class="switch"></span>
+                            <span>Photos with people</span>
+                        </label>
+                        <label class="switch-label">
+                            <input type="checkbox" id="filter-text">
+                            <span class="switch"></span>
+                            <span>Photos with text</span>
+                        </label>
+                        <div class="date-range">
+                            <label>Date range</label>
+                            <div class="date-inputs">
+                                <input type="date" id="filter-date-from">
+                                <span>to</span>
+                                <input type="date" id="filter-date-to">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-actions">
+                        <button onclick="searchImages()" class="btn btn-primary">
+                            <span class="material-icons">search</span>
+                            Search
+                        </button>
+                        <button onclick="clearSearch()" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
             </div>
-            <div id="no-photos" class="no-photos" style="display:none;">
-                <p>📷 No photos yet. Upload your first image!</p>
+
+            <!-- Gallery -->
+            <div class="gallery-container">
+                <div class="gallery-toolbar">
+                    <h1 id="gallery-title">Your Photos</h1>
+                    <div class="view-toggle">
+                        <button class="icon-btn active" onclick="setView('comfortable')" title="Comfortable">
+                            <span class="material-icons">view_comfy</span>
+                        </button>
+                        <button class="icon-btn" onclick="setView('compact')" title="Compact">
+                            <span class="material-icons">view_module</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="gallery" class="gallery comfortable-view">
+                    <div class="empty-state">
+                        <span class="material-icons">photo_library</span>
+                        <h2>No photos yet</h2>
+                        <p>Upload your first photos to get started</p>
+                        <button onclick="showUploadDialog()" class="btn btn-primary">
+                            <span class="material-icons">cloud_upload</span>
+                            Upload photos
+                        </button>
+                    </div>
+                </div>
             </div>
-        </section>
+        </main>
     </div>
 
     <!-- Image Modal -->
-    <div id="image-modal" class="modal" style="display:none;" onclick="closeModal()">
-        <span class="close">&times;</span>
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <img id="modal-image" src="" alt="">
-            <div class="modal-info">
-                <h3 id="modal-title"></h3>
-                <div id="modal-tags" class="tags"></div>
-                <div id="modal-ai-info" class="ai-info"></div>
+    <div class="modal" id="image-modal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="icon-btn" onclick="closeModal()">
+                    <span class="material-icons">close</span>
+                </button>
                 <div class="modal-actions">
-                    <button onclick="downloadImage()" class="btn btn-secondary">⬇️ Download</button>
-                    <button onclick="deleteCurrentImage()" class="btn btn-danger">🗑️ Delete</button>
+                    <button class="icon-btn" onclick="downloadImage()" title="Download">
+                        <span class="material-icons">download</span>
+                    </button>
+                    <button class="icon-btn" onclick="deleteCurrentImage()" title="Delete">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modal-img" src="" alt="">
+                </div>
+                <div class="modal-info">
+                    <div class="info-section">
+                        <h3>Details</h3>
+                        <div class="info-item">
+                            <span class="material-icons">image</span>
+                            <div>
+                                <div class="info-label">Name</div>
+                                <div id="modal-filename" class="info-value"></div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-icons">data_usage</span>
+                            <div>
+                                <div class="info-label">Size</div>
+                                <div id="modal-filesize" class="info-value"></div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-icons">calendar_today</span>
+                            <div>
+                                <div class="info-label">Uploaded</div>
+                                <div id="modal-date" class="info-value"></div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-icons">photo_size_select_large</span>
+                            <div>
+                                <div class="info-label">Dimensions</div>
+                                <div id="modal-dimensions" class="info-value"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-section" id="tags-section">
+                        <h3>
+                            <span class="material-icons">label</span>
+                            Tags
+                        </h3>
+                        <div id="modal-tags" class="tag-chips"></div>
+                    </div>
+                    <div class="info-section" id="ai-section">
+                        <h3>
+                            <span class="material-icons">psychology</span>
+                            AI Analysis
+                        </h3>
+                        <div id="modal-ai" class="ai-info"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Config & Scripts -->
     <script src="config.js"></script>
+    <script src="ui.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

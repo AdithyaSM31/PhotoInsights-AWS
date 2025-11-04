@@ -223,7 +223,7 @@ def format_image_item(item):
         'urls': {
             'thumbnail': f"{base_url}/processed/{user_id}/thumb-{image_id}.jpg",
             'medium': f"{base_url}/processed/{user_id}/med-{image_id}.jpg",
-            'large': f"{base_url}/processed/{user_id}/{image_id}.webp",
+            'large': f"{base_url}/processed/{user_id}/{image_id}.jpg",
             'original': f"https://{PROCESSED_BUCKET.replace('processed', 'uploads')}.s3.amazonaws.com/uploads/{user_id}/{image_id}-{item.get('uploadTimestamp', '')}-{item.get('imageName', '')}"
         },
         'tags': item.get('tags', []),

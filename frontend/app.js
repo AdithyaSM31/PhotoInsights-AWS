@@ -49,9 +49,14 @@ function showAuth() {
 }
 
 function showApp(email) {
-    document.getElementById('auth-container').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-    document.getElementById('user-email').textContent = email;
+    // Use the new UI function if available
+    if (typeof updateShowApp === 'function') {
+        updateShowApp(email);
+    } else {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        document.getElementById('user-email').textContent = email;
+    }
 }
 
 function showLogin() {
@@ -125,9 +130,12 @@ function login() {
 }
 
 function signup() {
+    console.log('Signup function called');
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const confirm = document.getElementById('signup-confirm').value;
+    
+    console.log('Email:', email, 'Password length:', password.length);
     
     if (!email || !password || !confirm) {
         showAuthError('Please fill in all fields');
@@ -154,14 +162,18 @@ function signup() {
         })
     ];
     
+    console.log('Attempting to sign up with Cognito...');
     userPool.signUp(email, password, attributeList, null, function(err, result) {
         hideLoading();
         
         if (err) {
+            console.error('Signup error:', err);
             showAuthError(err.message || 'Signup failed');
             return;
         }
         
+        console.log('Signup successful:', result);
+        document.getElementById('verify-email').textContent = email;
         showVerify();
         alert('Signup successful! Please check your email for verification code.');
     });
@@ -215,21 +227,32 @@ async function loadGallery() {
     showGalleryLoading();
     
     try {
+        console.log('Loading gallery with token:', jwtToken ? 'Token exists' : 'No token');
         const response = await fetch(`${CONFIG.api.baseUrl}${CONFIG.api.endpoints.images}?limit=50&sortOrder=desc`, {
             headers: {
                 'Authorization': `Bearer ${jwtToken}`
             }
         });
         
+        console.log('Gallery response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Gallery error response:', errorText);
             throw new Error('Failed to load gallery');
         }
         
         const data = await response.json();
+        console.log('Gallery data received:', data);
+        console.log('Number of images:', data.images ? data.images.length : 0);
+        
         currentImages = data.images || [];
         
         displayGallery(currentImages);
-        document.getElementById('photo-count').textContent = `(${currentImages.length})`;
+        const photoCountEl = document.getElementById('photo-count');
+        if (photoCountEl) {
+            photoCountEl.textContent = `${currentImages.length} photo${currentImages.length !== 1 ? 's' : ''}`;
+        }
         
     } catch (error) {
         console.error('Error loading gallery:', error);
@@ -240,16 +263,23 @@ async function loadGallery() {
 }
 
 function displayGallery(images) {
+    // Use the new UI function if available
+    if (typeof displayGalleryNew === 'function') {
+        displayGalleryNew(images);
+        return;
+    }
+    
+    // Fallback to old display
     const gallery = document.getElementById('gallery');
     const noPhotos = document.getElementById('no-photos');
     
     if (images.length === 0) {
         gallery.innerHTML = '';
-        noPhotos.style.display = 'block';
+        if (noPhotos) noPhotos.style.display = 'block';
         return;
     }
     
-    noPhotos.style.display = 'none';
+    if (noPhotos) noPhotos.style.display = 'none';
     
     gallery.innerHTML = images.map(img => `
         <div class="gallery-item" onclick="openModal('${img.imageId}')">
@@ -267,12 +297,31 @@ function displayGallery(images) {
 }
 
 // Search Functions
-async function searchImages() {
-    const searchTerm = document.getElementById('search-input').value.trim();
-    const hasFaces = document.getElementById('filter-faces').checked;
-    const hasText = document.getElementById('filter-text').checked;
-    const dateFrom = document.getElementById('filter-date-from').value;
-    const dateTo = document.getElementById('filter-date-to').value;
+async function searchImages(event) {
+    if (event) event.preventDefault();
+    
+    // Try to get search term from either the top search bar or search panel
+    const topSearchInput = document.getElementById('search-input');
+    const panelSearchInput = document.getElementById('search-tags');
+    
+    let searchTerm = '';
+    if (topSearchInput && topSearchInput.value.trim()) {
+        searchTerm = topSearchInput.value.trim();
+    } else if (panelSearchInput && panelSearchInput.value.trim()) {
+        searchTerm = panelSearchInput.value.trim();
+    }
+    
+    const facesFilter = document.getElementById('filter-faces');
+    const textFilter = document.getElementById('filter-text');
+    const dateFromFilter = document.getElementById('filter-date-from');
+    const dateToFilter = document.getElementById('filter-date-to');
+    
+    const hasFaces = facesFilter ? facesFilter.checked : false;
+    const hasText = textFilter ? textFilter.checked : false;
+    const dateFrom = dateFromFilter ? dateFromFilter.value : '';
+    const dateTo = dateToFilter ? dateToFilter.value : '';
+    
+    console.log('Search params:', { searchTerm, hasFaces, hasText, dateFrom, dateTo });
     
     if (!searchTerm && !hasFaces && !hasText && !dateFrom && !dateTo) {
         loadGallery();
@@ -289,6 +338,8 @@ async function searchImages() {
     if (dateTo) params.append('dateTo', dateTo);
     params.append('limit', '50');
     
+    console.log('Search URL:', `${CONFIG.api.baseUrl}${CONFIG.api.endpoints.search}?${params}`);
+    
     try {
         const response = await fetch(`${CONFIG.api.baseUrl}${CONFIG.api.endpoints.search}?${params}`, {
             headers: {
@@ -296,15 +347,23 @@ async function searchImages() {
             }
         });
         
+        console.log('Search response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Search error response:', errorText);
             throw new Error('Search failed');
         }
         
         const data = await response.json();
+        console.log('Search results:', data);
         currentImages = data.images || [];
         
         displayGallery(currentImages);
-        document.getElementById('photo-count').textContent = `(${currentImages.length} found)`;
+        const photoCountEl = document.getElementById('photo-count');
+        if (photoCountEl) {
+            photoCountEl.textContent = `${currentImages.length} photo${currentImages.length !== 1 ? 's' : ''}`;
+        }
         
     } catch (error) {
         console.error('Search error:', error);
@@ -325,10 +384,20 @@ function clearSearch() {
 
 // Upload Functions
 function setupDragAndDrop() {
-    const uploadBox = document.getElementById('upload-box');
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
     
+    if (!uploadZone || !fileInput) {
+        console.log('Upload elements not found');
+        return;
+    }
+    
+    // Setup file input change handler
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // Setup drag and drop
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        uploadBox.addEventListener(eventName, preventDefaults, false);
+        uploadZone.addEventListener(eventName, preventDefaults, false);
     });
     
     function preventDefaults(e) {
@@ -337,18 +406,23 @@ function setupDragAndDrop() {
     }
     
     ['dragenter', 'dragover'].forEach(eventName => {
-        uploadBox.addEventListener(eventName, () => {
-            uploadBox.classList.add('dragging');
+        uploadZone.addEventListener(eventName, () => {
+            uploadZone.classList.add('drag-over');
         });
     });
     
     ['dragleave', 'drop'].forEach(eventName => {
-        uploadBox.addEventListener(eventName, () => {
-            uploadBox.classList.remove('dragging');
+        uploadZone.addEventListener(eventName, () => {
+            uploadZone.classList.remove('drag-over');
         });
     });
     
-    uploadBox.addEventListener('drop', handleDrop, false);
+    uploadZone.addEventListener('drop', handleDrop, false);
+    
+    // Make upload zone clickable
+    uploadZone.addEventListener('click', () => {
+        fileInput.click();
+    });
 }
 
 function handleDrop(e) {
@@ -378,20 +452,42 @@ async function handleFiles(files) {
     if (validFiles.length === 0) return;
     
     const progress = document.getElementById('upload-progress');
-    progress.style.display = 'block';
-    progress.innerHTML = '<p>Uploading images...</p>';
+    if (progress) {
+        progress.style.display = 'block';
+        progress.innerHTML = '<p style="text-align: center; padding: 12px;">Uploading images...</p>';
+    }
+    
+    let successCount = 0;
+    let errorCount = 0;
     
     for (const file of validFiles) {
         try {
             await uploadFile(file);
-            progress.innerHTML += `<p>✓ ${file.name} uploaded successfully</p>`;
+            successCount++;
+            if (progress) {
+                progress.innerHTML += `<div class="upload-item"><span class="material-icons" style="color: green;">check_circle</span><span>${file.name}</span></div>`;
+            }
         } catch (error) {
-            progress.innerHTML += `<p>✗ ${file.name} failed: ${error.message}</p>`;
+            errorCount++;
+            if (progress) {
+                progress.innerHTML += `<div class="upload-item"><span class="material-icons" style="color: red;">error</span><span>${file.name}: ${error.message}</span></div>`;
+            }
         }
     }
     
     setTimeout(() => {
-        progress.style.display = 'none';
+        if (progress) {
+            progress.style.display = 'none';
+            progress.innerHTML = '';
+        }
+        // Reset file input
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) fileInput.value = '';
+        
+        // Close dialog and reload
+        if (typeof closeUploadDialog === 'function') {
+            closeUploadDialog();
+        }
         loadGallery();
     }, 2000);
 }
@@ -433,19 +529,40 @@ async function uploadFile(file) {
 
 // Modal Functions
 function openModal(imageId) {
-    const image = currentImages.find(img => img.imageId === imageId);
-    if (!image) return;
+    console.log('openModal called with imageId:', imageId);
+    console.log('currentImages array:', currentImages);
     
+    const image = currentImages.find(img => img.imageId === imageId);
+    if (!image) {
+        console.error('Image not found in currentImages:', imageId);
+        return;
+    }
+    
+    console.log('Found image:', image);
     currentImageId = imageId;
     
-    document.getElementById('modal-image').src = image.urls.large;
-    document.getElementById('modal-title').textContent = image.imageName;
+    // Use the new UI function if available
+    if (typeof displayModalNew === 'function') {
+        console.log('Using displayModalNew');
+        displayModalNew(image);
+        return;
+    }
+    
+    console.log('Using fallback modal display');
+    
+    // Fallback to old display
+    const modalImg = document.getElementById('modal-image') || document.getElementById('modal-img');
+    if (modalImg) modalImg.src = image.urls.large;
+    
+    const modalTitle = document.getElementById('modal-title') || document.getElementById('modal-filename');
+    if (modalTitle) modalTitle.textContent = image.imageName;
     
     // Display tags
     const tagsHtml = image.tags && image.tags.length > 0
         ? image.tags.map(tag => `<span class="tag">${tag}</span>`).join('')
         : '<p>No tags yet</p>';
-    document.getElementById('modal-tags').innerHTML = tagsHtml;
+    const modalTags = document.getElementById('modal-tags');
+    if (modalTags) modalTags.innerHTML = tagsHtml;
     
     // Display AI info
     let aiHtml = '';
@@ -460,13 +577,29 @@ function openModal(imageId) {
     } else {
         aiHtml = '<p>Processing...</p>';
     }
-    document.getElementById('modal-ai-info').innerHTML = aiHtml;
+    const modalAiInfo = document.getElementById('modal-ai-info') || document.getElementById('modal-ai');
+    if (modalAiInfo) modalAiInfo.innerHTML = aiHtml;
     
-    document.getElementById('image-modal').style.display = 'flex';
+    const modal = document.getElementById('image-modal');
+    console.log('Modal element:', modal);
+    if (modal) {
+        // Remove any inline styles first
+        modal.style.display = '';
+        // Add show class to trigger display
+        modal.classList.add('show');
+        console.log('Modal opened, show class added');
+    } else {
+        console.error('Modal element not found');
+    }
 }
 
 function closeModal() {
-    document.getElementById('image-modal').style.display = 'none';
+    console.log('closeModal called');
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+        console.log('Closing modal, removing show class');
+        modal.classList.remove('show');
+    }
     currentImageId = null;
 }
 
@@ -522,9 +655,20 @@ function hideLoading() {
 }
 
 function showGalleryLoading() {
-    document.getElementById('gallery-loading').style.display = 'flex';
+    const loadingEl = document.getElementById('gallery-loading');
+    if (loadingEl) {
+        loadingEl.style.display = 'flex';
+    }
+    // Show spinner in gallery
+    const gallery = document.getElementById('gallery');
+    if (gallery) {
+        gallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;"><div class="spinner"></div></div>';
+    }
 }
 
 function hideGalleryLoading() {
-    document.getElementById('gallery-loading').style.display = 'none';
+    const loadingEl = document.getElementById('gallery-loading');
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
 }
