@@ -1,0 +1,55 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::photogallery-uploads-23brs1079",
+        "arn:aws:s3:::photogallery-uploads-23brs1079/*",
+        "arn:aws:s3:::photogallery-processed-23brs1079",
+        "arn:aws:s3:::photogallery-processed-23brs1079/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:799016889364:table/PhotoGallery-Images",
+        "arn:aws:dynamodb:us-east-1:799016889364:table/PhotoGallery-Images/index/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rekognition:DetectLabels",
+        "rekognition:DetectText",
+        "rekognition:DetectFaces",
+        "rekognition:DetectModerationLabels"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:us-east-1:799016889364:function:PhotoGallery-*"
+      ]
+    }
+  ]
+}
