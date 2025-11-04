@@ -83,8 +83,8 @@ def handle_direct_invocation(event, context):
     
     print(f"Analyzing image: {image_id} for user: {user_id}")
     
-    # Analyze the large processed image
-    s3_key = f"processed/{user_id}/{image_id}.webp"
+    # Analyze the large processed image (use .jpg for simplified version)
+    s3_key = event.get('key') or f"processed/{user_id}/{image_id}.jpg"
     
     # Run all Rekognition analyses
     results = analyze_image(bucket, s3_key)
@@ -119,8 +119,8 @@ def handle_dynamodb_stream(event):
             
             print(f"Stream trigger - Analyzing: {image_id}")
             
-            # Analyze image
-            s3_key = f"processed/{user_id}/{image_id}.webp"
+            # Analyze image (use .jpg for simplified version)
+            s3_key = f"processed/{user_id}/{image_id}.jpg"
             results = analyze_image(PROCESSED_BUCKET, s3_key)
             
             # Update DynamoDB
