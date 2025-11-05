@@ -10,11 +10,9 @@ A serverless, AI-powered photo gallery application built with AWS services. Uplo
 
 
 
-## 🌟 Features- **Adithya Sankar Menon** - 23BRS1079
+## 🌟 Features
 
-- **Karthick Swaminathan** - 23BRS1063
-
-- **🔐 Secure Authentication** - AWS Cognito user management- **Sambari Bhuvan** - 23BRS1189
+- **🔐 Secure Authentication** - AWS Cognito user management
 
 - **🤖 AI-Powered Tagging** - Automatic image analysis using Amazon Rekognition
 
@@ -202,15 +200,6 @@ MIT License - feel free to use this project for learning and development!- AWS C
 - Cognito: 50K MAU (FREE)
 - Rekognition: 5K images/month (FREE)
 
-## 📊 Project Timeline
-
-- **Week 1**: AWS infrastructure setup
-- **Week 2**: Backend Lambda functions
-- **Week 3**: Image processing pipeline
-- **Week 4**: Frontend development
-- **Week 5**: CloudFront & optimization
-- **Week 6**: Testing & deployment
-
 ## 🧪 Testing
 
 ```powershell
@@ -250,25 +239,11 @@ Team members:
 3. Commit changes
 4. Push and create pull requests
 
-## 📧 Contact
-
-For questions or issues, contact any team member:
-- Adithya Sankar Menon - 23BRS1079
-- Karthick Swaminathan - 23BRS1063
-- Sambari Bhuvan - 23BRS1189
-
-## 📄 License
-
-This project is for educational purposes as part of DA3 submission.
-
 ## 🙏 Acknowledgments
 
 - AWS Documentation and Tutorials
-- Course Instructor and Teaching Assistants
 - Open source libraries and tools used
 
 ---
 
 **Project Status**: 🔨 In Development
-
-**Last Updated**: October 29, 2025
