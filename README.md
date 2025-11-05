@@ -6,7 +6,7 @@
 
 
 
-A serverless, AI-powered photo gallery application built with AWS services. Upload photos, get automatic AI-generated tags using Amazon Rekognition, and search your photo library intelligently.## 👥 Team Members
+A serverless, AI-powered photo gallery application built with AWS services. Upload photos, get automatic AI-generated tags using Amazon Rekognition, and search your photo library intelligently.
 
 
 
