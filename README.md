@@ -16,7 +16,7 @@ A serverless, AI-powered photo gallery application built with AWS services. Uplo
 
 - **🤖 AI-Powered Tagging** - Automatic image analysis using Amazon Rekognition
 
-  - Object & scene detection## 🎯 Project Overview
+  - Object & scene detection
 
   - Face detection and counting
 
@@ -24,7 +24,7 @@ A serverless, AI-powered photo gallery application built with AWS services. Uplo
 
   - Content moderation
 
-- **🔍 Smart Search** - Search photos by tags, faces, text, and date## 🏗️ Architecture
+- **🔍 Smart Search** - Search photos by tags, faces, text, and date
 
 - **📱 Responsive Design** - Google Photos-inspired UI with dark mode
 
@@ -40,7 +40,7 @@ A serverless, AI-powered photo gallery application built with AWS services. Uplo
 
 
 
-### AWS Services Used## 🔧 AWS Services Used
+### AWS Services Used
 
 
 
